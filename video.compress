@@ -1,0 +1,35 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Compressing a video to reduce its size.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.compress --quality 28 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "QUALITY" 28
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${QUALITY}-compressed").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -acodec 'copy' \
+        -vcodec "libx265" \
+        -fflags '+genpts' \
+        -v "quiet" \
+        -crf "${QUALITY}" \
+        -strict -2 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

@@ -1,0 +1,25 @@
+#!/bin/bash
+## -------------------------------------------------------------
+# Purpose:
+# Extracts the duration of a video.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.duration a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+ffprobe \
+	-v 'error' \
+	-select_streams 'v:0' \
+	-show_entries 'stream=duration' \
+	-of 'default=noprint_wrappers=1:nokey=1' \
+	"${INPUT}"
+if [ "$?" != "0" ]
+then
+    echo.error "Failed to process video!"
+    exit 3
+fi

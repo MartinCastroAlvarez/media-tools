@@ -1,0 +1,21 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Evaluates if a parameter is a valid file.
+#
+# Usage:
+# >>> source args.require.file "PATH"
+# >>> source args.require.file "INPUT"
+# 
+# Combining with `args.parse`:
+# >>> source args.parse $@
+# >>> source args.require "MESSAGE"
+# >>> source args.require.file "PATH"
+# -------------------------------------------------------------
+source args.require "${1}" "${2}"
+if [ ! -f "${!1}" ]
+then
+    echo.error "Invalid file ${1}: '${!1}'!"
+    sed '/die/{q 2}'
+    exit 1
+fi

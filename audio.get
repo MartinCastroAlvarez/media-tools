@@ -1,0 +1,30 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Downloads audio from multiple sources.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> audio.get "https://youtube.com/lorem-ipsum"
+# >>> audio.get --target a.mp3 "https://youtube.com/lorem-ipsum"
+# -------------------------------------------------------------
+source args.parse $@
+source args.require "INPUT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}").mp3"
+if [ ! -f "${OUTPUT}" ]
+then
+    youtube-dl \
+        --extract-audio \
+        --audio-format "mp3" \
+        --output "${OUTPUT}" \
+        "${INPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process audio!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

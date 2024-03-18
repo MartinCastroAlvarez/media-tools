@@ -1,0 +1,36 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Download a video from any source.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.fade --in 1 --out 4 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "IN" 0
+source args.require "OUT" 0
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${IN}-${OUT}-faded").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    DURATION="$(video.duration "${INPUT}")"
+    FINAL_CUT=$(bc -l <<< "$DURATION - $OUT")
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -v "quiet" \
+        -acodec 'copy' \
+        -filter:v "fade=t=in:st=0:d=${IN}, fade=t=out:st=${FINAL_CUT}:d=${OUT}" \
+        -strict -2 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

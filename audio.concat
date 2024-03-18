@@ -1,0 +1,34 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Concatenates 2 audio files.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> audio.concat --with b.mp3 --transition 1 a.mp3
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require.file "WITH"
+source args.require "TRANSITION" 0
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${CONCAT}-${TRANSITION}-concat").mp3"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -i "${WITH}" \
+        -v "quiet" \
+        -qscale 0 \
+        -filter_complex "acrossfade=duration=${TRANSITION}" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process audio!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

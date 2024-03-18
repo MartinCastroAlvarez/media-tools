@@ -1,0 +1,28 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Squaring image so that width and height are the same.
+#
+# Usage:
+# >>> image.square --size 100 a.png
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "SIZE" 100
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${SIZE}-squared").png"
+if [ ! -f "${OUTPUT}" ]
+then
+    RESOLUTION="${SIZE}x${SIZE}"
+    convert "${INPUT}" \
+        -define jpeg:size="${RESOLUTION}" \
+        -thumbnail "${SIZE}" \
+        -gravity "center" \
+        -extent "${RESOLUTION}" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process image!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

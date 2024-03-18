@@ -1,0 +1,32 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Evaluates if a parameter has been successfully passed as input.
+#
+# Usage:
+# >>> source args.require "MESSAGE"
+# >>> source args.require "COLOR"
+# 
+# Combining with `args.parse`:
+# >>> source args.parse $@
+# >>> source args.require "MESSAGE"
+# >>> source args.require "ERROR" "Default error message!"
+# >>> source args.require "NUMBER" 10
+# -------------------------------------------------------------
+if [ -z "${1}" ]
+then
+    echo.error "Missing argument name!"
+    exit 1
+fi
+value="${!1}"
+if [[ -z "${value}" && ! -z "${2}" ]]
+then
+    export ${1}="${2}"
+    value="${2}"
+fi
+if [ -z "${value}" ]
+then
+    echo.error "Missing '${1}' argument!"
+    sed '/die/{q 2}'
+    exit 1
+fi

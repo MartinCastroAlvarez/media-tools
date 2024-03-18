@@ -1,0 +1,34 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Adding audio to video.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.merge --with a.mp3 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require.file "WITH"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${WITH}-merge").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -i "${WITH}" \
+        -v "quiet" \
+        -acodec 'aac' \
+        -vcodec 'copy' \
+        -strict -2 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

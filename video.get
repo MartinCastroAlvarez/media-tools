@@ -1,0 +1,36 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Download a video from any source.
+#
+# References:
+# - echo.info "Downloading video from Youtube."
+# - echo.info "Supported sites: https://ytdl-org.github.io/youtube-dl/supportedsites.html"
+# - echo.info "https://github.com/ytdl-org/youtube-dl/blob/master/README.md#readme"
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+# 
+# Usage:
+# >>> video.get https://twitter.com/i/status/abc
+# >>> video.get --output a.mp4 https://twitter.com/i/status/abc
+# -------------------------------------------------------------
+source args.parse $@
+source args.require "INPUT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}").mp4"
+if [ ! -f "${OUTPUT}"  ]
+then
+    youtube-dl \
+        --output "${OUTPUT}" \
+        --format "mp4" \
+        --audio-quality 0 \
+        --retries 10 \
+        "${INPUT}"
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to download video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

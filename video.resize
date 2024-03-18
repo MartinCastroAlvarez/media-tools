@@ -1,0 +1,35 @@
+#!/bin/bash
+#  -------------------------------------------------------------
+# Purpose:
+# Resizing video.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.resize --width 600 --height 800  a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "WIDTH"
+source args.require "HEIGHT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${WIDTH}-${HEIGHT}-resized").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -v "quiet" \
+        -noautorotate \
+        -i "${INPUT}" \
+        -s "${WIDTH}x${HEIGHT}" \
+        -acodec "copy" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"
+

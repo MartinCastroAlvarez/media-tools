@@ -1,0 +1,28 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Creating a loop of a video.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.loop a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-loop").mp4"
+REVERSE="$(OUTPUT="" bash video.reverse "${INPUT}")"
+if [ "$?" != "0" ]
+then
+    echo.error "Failed to reverse video!"
+    exit 3
+fi
+OUTPUT="$(OUTPUT="" video.concat --with "${REVERSE}" "${INPUT}")"
+if [ "$?" != "0" ]
+then
+    echo.error "Failed to create loop!"
+    exit 3
+fi
+echo "${OUTPUT}"

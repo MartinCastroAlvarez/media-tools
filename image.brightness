@@ -1,0 +1,24 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Processing image brightness.
+#
+# Usage:
+# >>> image.brightness --intensity 100 a.png
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "INTENSITY" 100
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${INTENSITY}-brightness").png"
+if [ ! -f "${OUTPUT}" ]
+then
+    convert "${INPUT}" \
+        -brightness-contrast "${INTENSITY}%" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process image!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"
