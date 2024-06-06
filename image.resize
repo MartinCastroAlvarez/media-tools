@@ -1,0 +1,25 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Resizing image.
+#
+# Usage:
+# >>> image.resize --width 100 --height 400  a.png
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "WIDTH"
+source args.require "HEIGHT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${WIDTH}-${HEIGHT}-resized").png"
+if [ ! -f "${OUTPUT}" ]
+then
+    convert "${INPUT}" \
+        -resize "${WIDTH}x${HEIGHT}" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process image!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

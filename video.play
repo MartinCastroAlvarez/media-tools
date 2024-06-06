@@ -1,0 +1,15 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Playing a video in VLC.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.play a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+vlc "${INPUT}"

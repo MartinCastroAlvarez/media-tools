@@ -1,0 +1,27 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Processing image saturation.
+#
+# Usage:
+# >>> image.saturation --intensity 5 a.png
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "INTENSITY" 100
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${INTENSITY}-saturation").png"
+if [ ! -f "${OUTPUT}" ]
+then
+    convert "${INPUT}" \
+        -colorspace 'HSB' \
+        -channel 'G' \
+        -evaluate set "${INTENSITY}%" \
+        +channel \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process image!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

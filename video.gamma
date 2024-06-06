@@ -1,0 +1,32 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Alter colors gamma.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.gamma --intensity 5 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "INTENSITY" 1
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${INTENSITY}-gamma").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -v "quiet" \
+        -acodec 'copy' \
+        -vf "eq=gamma=${INTENSITY}" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

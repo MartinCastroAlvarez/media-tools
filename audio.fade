@@ -1,0 +1,37 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Adds fade in and fade out to an audio file.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> audio.fade --in 0.1 --out 0.4 a.mp3
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "IN" 0
+source args.require "OUT" 0
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${IN}-${OUT}-faded").mp3"
+if [ ! -f "${OUTPUT}" ]
+then
+    DURATION=$(audio.duration "${INPUT}")
+    FINAL_CUT=$(bc -l <<< "$DURATION - $OUT")
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -filter:a "afade=t=in:st=0:d=${IN}, afade=t=out:st=${FINAL_CUT}:d=${OUT}" \
+        -vcodec "copy" \
+        -v "quiet" \
+        -strict -2 \
+        -q:v 0 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process audio!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

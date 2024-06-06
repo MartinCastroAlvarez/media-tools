@@ -1,0 +1,30 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Altering video saturation.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.frames --fps 30 --dir /tmp/lorem a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "FPS" 30
+source args.require "DIR" "/tmp/"
+mkdir -p "${DIR}" 2>/dev/null
+OUTPUT="${IDR}/frame_${FPS}_%d.png"
+ffmpeg \
+    -i "${INPUT}" \
+    -v "quiet" \
+    -vf fps="${FPS}" \
+    "${OUTPUT}" >/dev/null
+LAST_COMMAND_EXIT_CODE=$?
+if [ ${LAST_COMMAND_EXIT_CODE} != 0 ]
+then
+    echo.error "Failed to extract $INPUT."
+    exit ${LAST_COMMAND_EXIT_CODE}
+fi
+echo "${DIR}"

@@ -1,0 +1,23 @@
+#!/bin/bash
+## -------------------------------------------------------------
+# Purpose:
+# Extracts the duration of an audio file.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> audio.duration a.mp3
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+ffprobe \
+    -i "${INPUT}" \
+    -show_entries "format=duration" \
+    -of csv="p=0"
+if [ "$?" != "0" ]
+then
+    echo.error "Failed to process audio!"
+    exit 3
+fi

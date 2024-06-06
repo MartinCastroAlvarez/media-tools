@@ -1,0 +1,68 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Parses the arguments of a shell scripts and sets env vars dynamically.
+#
+# Usage:
+# >>> source args.parse --app A -b B --caston-maiden C unknown something else
+# >>> echo $MESSAGE
+# ... -b B unknown something
+# >>> echo $CASTONMAIDEN
+# ... C
+#
+# Combining with `args.require`:
+# >>> source args.parse $@
+# >>> source args.require "MESSAGE"
+# >>> source args.require "NUMBER"
+# -------------------------------------------------------------
+i=1
+MESSAGE=""
+while [ $i -le "${#@}" ]
+do
+    key=$(echo "$@" | awk '{print $'$i'}')
+    i=$((i+1))
+    value=$(echo "$@" | awk '{print $'$i'}')
+
+    if [[ ! -z "${value}" && "${key}" == "--"* ]]
+    then
+        # If the argument names starts with double dash.
+        key=$(echo "${key}" | sed "s/-//g" | tr '[:lower:]' '[:upper:]')
+        export $key="${value}"
+        i=$((i+1))
+
+    else
+        # If the argument is not recognized, append to input data.
+        # If the input data is empty, then avoid the spacing issue
+        # at the beginning of the string.
+        if [ -z "${MESSAGE}" ]
+        then
+            MESSAGE="${key}"
+        else
+            MESSAGE="${MESSAGE} ${key}"
+        fi
+    fi
+
+done
+
+# -------------------------------------------------------------
+# Reading from STDIN if the pipe exists.
+#
+# Reference:
+# https://stackoverflow.com/questions/20046804
+# -------------------------------------------------------------
+if [[ ! -t 0 ]]
+then
+    STDIN="$(cat)"
+    if [ ! -z "${STDIN}" ]
+    then
+        MESSAGE="${STDIN}"
+    fi
+fi
+
+# -------------------------------------------------------------
+# The input message is available at multiple variables.
+# -------------------------------------------------------------
+INPUT="${MESSAGE}"
+DATA="${MESSAGE}"
+STDIN="${MESSAGE}"
+PAYLOAD="${MESSAGE}"

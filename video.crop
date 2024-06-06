@@ -1,0 +1,51 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Download a video from any source.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.crop --top 5 --height 3 --left 3 --width 5  a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "TOP" 0
+source args.require "LEFT" 0
+source args.require "HEIGHT" 0
+source args.require "WIDTH" 0
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${TOP}-${HEIGHT}-${LEFT}-${WIDTH}-crop").mp4"
+
+TOTAL_WIDTH=$(expr $LEFT + $WIDTH)
+MAX_WIDTH=$(video.width "${INPUT}")
+if [ $TOTAL_WIDTH -gt $MAX_WIDTH ]
+then
+	echo.error "Max width: ${MAX_WIDTH}. Received: $TOTAL_WIDTH"
+	exit 1
+fi
+
+TOTAL_HEIGHT=$(expr $TOP + $HEIGHT)
+MAX_HEIGHT=$(video.height "${INPUT}")
+if [ $TOTAL_HEIGHT -gt $MAX_HEIGHT ]
+then
+	echo.error "Max height: ${MAX_HEIGHT}. Received: $TOTAL_HEIGHT."
+	exit 1
+fi
+
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+         -noautorotate \
+        -i "${INPUT}" \
+        -filter:v "crop=$WIDTH:$HEIGHT:$LEFT:$TOP" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

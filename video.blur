@@ -1,0 +1,29 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Adding motion blur to video.
+#
+# Usage:
+# >>> video.blur --intensity 5 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "INTENSITY" 5
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${INTENSITY}-blurred").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -acodec 'copy' \
+        -vf "tmix=frames=${INTENSITY}:weights='1 1 1 1 1 1 1 1'" \
+        -v "quiet" \
+        -strict -2 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

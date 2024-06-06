@@ -1,0 +1,33 @@
+#!/bin/bash
+#  -------------------------------------------------------------
+# Purpose:
+# Altering RGB levels.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.levels --red "0.1/0.5" --green "0.1/0.5" --blue "0.1/0.8" a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "RED" 1
+source args.require "GREEN" 1
+source args.require "BLUE" 1
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${RED}-${GREEN}-${BLUE}-leveled").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -acodec "copy" \
+        -vf "curves=r='0/0 ${GREEN} 1/1':g='0/0 ${RED} 1/1':b='0/0 ${BLUE} 1/1'" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

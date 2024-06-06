@@ -1,0 +1,33 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Altering video brightness.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.brightness --intensity 5 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "INTENSITY" -0.2
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${INTENSITY}-brightness").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -acodec 'copy' \
+        -q:v 0 \
+        -v "quiet" \
+        -vf "eq=brightness=${INTENSITY}" \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

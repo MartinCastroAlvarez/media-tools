@@ -1,0 +1,49 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Concatenating two videos.
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.concat --with b a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require.file "WITH"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-${WITH}-concat").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    TMP1="${OUTPUT}-tmp1.ts"
+    TMP2="${OUTPUT}-tmp2.ts"
+    ffmpeg \
+        -i $INPUT \
+        -v "quiet" \
+        -vcodec 'copy' \
+        -bsf:v 'h264_mp4toannexb' \
+        -f 'mpegts' \
+        "${TMP1}" >/dev/null
+    ffmpeg \
+        -i $WITH \
+        -v "quiet" \
+        -vcodec 'copy' \
+        -bsf:v 'h264_mp4toannexb' \
+        -f 'mpegts' \
+        "${TMP2}" >/dev/null
+    ffmpeg \
+        -y \
+        -v "quiet" \
+        -i "concat:${TMP1}|${TMP2}" \
+        -bsf:a 'aac_adtstoasc' \
+        ${OUTPUT} >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+    rm "${TMP1}"
+    rm "${TMP2}"
+fi
+echo "${OUTPUT}"

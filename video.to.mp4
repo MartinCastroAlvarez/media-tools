@@ -1,0 +1,35 @@
+#!/bin/bash
+#  -------------------------------------------------------------
+# Purpose:
+# Converting to mp4
+#
+# Installation:
+# >>> source sudo yum -y install youtube -dl
+# >>> source sudo yum -y install ffmpeg ffmpeg-devel
+#
+# Usage:
+# >>> video.to.mp4 a.mp4
+# -------------------------------------------------------------
+source args.parse $@
+source args.require.file "INPUT"
+source args.require "OUTPUT" "$(echo.hash "${INPUT}-mp4").mp4"
+if [ ! -f "${OUTPUT}" ]
+then
+    ffmpeg \
+        -y \
+        -i "${INPUT}" \
+        -acodec "copy" \
+        -c:v "libx264" \
+        -profile:v "baseline" \
+        -level 3.0 \
+        -pix_fmt "yuv420p" \
+        -ac 2 \
+        -strict -2 \
+        "${OUTPUT}" >/dev/null
+    if [ "$?" != "0" ]
+    then
+        echo.error "Failed to process video!"
+        exit 3
+    fi
+fi
+echo "${OUTPUT}"

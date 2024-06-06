@@ -1,0 +1,19 @@
+#!/bin/bash
+# -------------------------------------------------------------
+# Purpose:
+# Prints an error message to STDOUT
+#
+# Reference:
+# - https://misc.flogisoft.com/bash/tip_colors_and_formatting
+# - https://linux.101hacks.com/ps1-examples/prompt-color-using-tput/
+#
+# Usage:
+# >>> echo.error "Failed!"
+# -------------------------------------------------------------
+tput bold
+# tput smso
+tput setaf 1
+echo ""
+echo " [x] ${@}"
+echo.line
+tput sgr0
